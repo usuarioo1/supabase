@@ -1,105 +1,176 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Implementación de CRUD con Supabase
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+Este documento detalla cómo se implementa el CRUD (Create, Read, Update, Delete) en este proyecto usando Supabase y Next.js.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## Configuración Inicial
 
-## Features
+### 1. Variables de Entorno
+```env
+NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=tu_anon_key
+```
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+### 2. Clientes de Supabase
 
-## Demo
+#### Cliente del Navegador (Components)
+```typescript
+import { createBrowserClient } from '@supabase/ssr'
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+)
+```
 
-## Deploy to Vercel
+#### Cliente del Servidor (Server Components)
+```typescript
+import { createClient } from "@/lib/supabase/server"
 
-Vercel deployment will guide you through creating a Supabase account and project.
+const supabase = await createClient()
+```
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## Operaciones CRUD
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+### 1. Crear (Create)
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+Ejemplo de creación de una persona:
+```typescript
+const { error } = await supabase
+  .from('personas')
+  .insert([{
+    nombre: 'Juan',
+    email: 'juan@ejemplo.com',
+    ocupacion: 'Desarrollador'
+  }])
+```
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+Implementación en un formulario:
+```typescript
+'use client'
+export function CreatePersonaForm() {
+    const [formData, setFormData] = useState({
+        nombre: '',
+        email: '',
+        ocupacion: ''
+    })
+    
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault()
+        const { error } = await supabase
+            .from('personas')
+            .insert([formData])
+    }
+    
+    return (
+        <form onSubmit={handleSubmit}>
+            {/* Campos del formulario */}
+        </form>
+    )
+}
+```
 
-## Clone and run locally
+### 2. Leer (Read)
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+Obtener todas las personas:
+```typescript
+const { data: personas, error } = await supabase
+  .from('personas')
+  .select('id, nombre, email, ocupacion')
+```
 
-2. Create a Next.js app using the Supabase Starter template npx command
+Implementación en un componente de servidor:
+```typescript
+export default async function PersonasPage() {
+    const supabase = await createClient()
+    const { data: personas } = await supabase
+        .from('personas')
+        .select('id, nombre, email, ocupacion')
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {personas?.map(persona => (
+                <div key={persona.id}>
+                    <h2>{persona.nombre}</h2>
+                    <p>{persona.email}</p>
+                    <p>{persona.ocupacion}</p>
+                </div>
+            ))}
+        </div>
+    )
+}
+```
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+### 3. Actualizar (Update)
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+Actualizar una persona:
+```typescript
+const { error } = await supabase
+  .from('personas')
+  .update({ ocupacion: 'Senior Developer' })
+  .eq('id', 1)
+```
 
-3. Use `cd` to change into the app's directory
+### 4. Eliminar (Delete)
 
-   ```bash
-   cd with-supabase-app
-   ```
+Eliminar una persona:
+```typescript
+const { error } = await supabase
+  .from('personas')
+  .delete()
+  .eq('id', 1)
+```
 
-4. Rename `.env.example` to `.env.local` and update the following:
+## Rutas Protegidas
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+El proyecto implementa rutas protegidas que requieren autenticación:
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+1. Todas las rutas bajo `/protected/*` requieren autenticación
+2. Si un usuario no autenticado intenta acceder, será redirigido a `/auth/login`
+3. Ejemplo de ruta protegida: `/protected/personas`
 
-5. You can now run the Next.js local development server:
+## Estructura de Archivos
 
-   ```bash
-   npm run dev
-   ```
+```
+/app
+  /protected
+    /personas
+      page.tsx         # Página principal del CRUD
+/components
+  /personas
+    create-persona-form.tsx  # Formulario de creación
+/lib
+  /supabase
+    client.ts         # Cliente del navegador
+    server.ts         # Cliente del servidor
+```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+## Componentes Principales
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+### 1. Página Principal (page.tsx)
+- Lista todas las personas
+- Incluye el formulario de creación
+- Implementa la interfaz básica del CRUD
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+### 2. Formulario de Creación (create-persona-form.tsx)
+- Maneja la creación de nuevas personas
+- Implementa validación de formularios
+- Gestiona estados de carga y errores
 
-## Feedback and issues
+## Mejores Prácticas
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+1. **Validación**
+   - Validar datos tanto en el cliente como en el servidor
+   - Usar tipos TypeScript para asegurar la integridad de los datos
 
-## More Supabase examples
+2. **Manejo de Errores**
+   - Siempre verificar los errores retornados por Supabase
+   - Mostrar mensajes de error amigables al usuario
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+3. **Optimización**
+   - Usar Server Components cuando sea posible
+   - Implementar caching donde sea apropiado
+
+4. **Seguridad**
+   - Usar rutas protegidas para operaciones sensibles
+   - Implementar validación de permisos en el backend
+
