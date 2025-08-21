@@ -9,7 +9,9 @@ interface Instrument {
 
 export default async function Instruments() {
     const supabase = await createClient();
-    const { data: instruments } = await supabase.from("instruments").select<any, Instrument>();
+    const { data: instruments } = await supabase
+        .from("instruments")
+        .select() as unknown as { data: Instrument[] };
 
     return (
         <div className="container mx-auto p-4">
