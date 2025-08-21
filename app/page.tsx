@@ -25,7 +25,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl">
             <Link href="/protected/personas" className="w-full">
               <Button variant="outline" className="w-full h-24 text-lg">
-                Gestión de Personal
+                Gestión de Personal interno
               </Button>
             </Link>
             
