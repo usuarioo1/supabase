@@ -22,24 +22,20 @@ export default function Home() {
         <div className="flex-1 flex flex-col items-center max-w-5xl p-5 w-full">
           <h1 className="text-4xl font-bold mb-8">Probando Supabase</h1>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 w-full max-w-4xl">
             <Link href="/protected/personas" className="w-full">
               <Button variant="outline" className="w-full h-24 text-lg">
                 Gestión de Personal interno
               </Button>
             </Link>
             
-            <Link href="/protected/notes" className="w-full">
+            <Link href="/notes" className="w-full">
               <Button variant="outline" className="w-full h-24 text-lg">
                 Gestión de Notas
               </Button>
             </Link>
             
-            <Link href="/instruments" className="w-full">
-              <Button variant="outline" className="w-full h-24 text-lg">
-                Instrumentos
-              </Button>
-            </Link>
+            
           </div>
         </div>
 

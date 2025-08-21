@@ -53,7 +53,7 @@ export function LoginForm({
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Ingresa tu Email para ingresar a tu cuenta y descubre los secretos de universo
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,7 +77,7 @@ export function LoginForm({
                     href="/auth/forgot-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    Olvidaste tu contraseña olvidadizo?
                   </Link>
                 </div>
                 <Input
@@ -94,12 +94,12 @@ export function LoginForm({
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+              No tienes cuenta?, Create una ya!{" "}
               <Link
                 href="/auth/sign-up"
                 className="underline underline-offset-4"
               >
-                Sign up
+                Registrarme
               </Link>
             </div>
           </form>
